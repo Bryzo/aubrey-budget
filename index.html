@@ -266,18 +266,20 @@
     }
 
     @media(max-width: 550px) {
-        .cards {
-            grid-template-columns: 1fr;
-        }
+    .cards {
+        grid-template-columns: 1fr;
+    }
 
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 
-        th:nth-child(3),
-        td:nth-child(3) {
-            display: none;
-        }
+    /* Hide Annual column only in Recurring table */
+    #recurring th:nth-child(3),
+    #recurring td:nth-child(3) {
+        display: none;
+    }
+}
     }
 </style>
 </head>
