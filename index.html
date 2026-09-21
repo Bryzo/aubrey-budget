@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aubrey Budget</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b1220">
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg: #0b1220;
+        --panel: #111b2e;
+        --panel2: #162238;
+        --border: #263653;
+        --text: #eef4ff;
+        --muted: #9eacc4;
+        --green: #34d399;
+        --red: #fb7185;
+        --blue: #60a5fa;
+        --orange: #fbbf24;
+    }
+
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    header {
+        padding: 22px;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 25px;
+    }
+
+    header p {
+        margin: 5px 0 0;
+        color: var(--muted);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    .card small {
+        color: var(--muted);
+    }
+
+    .card strong {
+        display: block;
+        margin-top: 7px;
+        font-size: 23px;
+    }
+
+    .positive {
+        color: var(--green);
+    }
+
+    .negative {
+        color: var(--red);
+    }
+
+    .warning {
+        color: var(--orange);
+    }
+
+    nav {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+
+    nav button {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        padding: 11px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    nav button.active {
+        background: var(--blue);
+        color: #08111f;
+    }
+
+    .page {
+        display: none;
+    }
+
+    .page.active {
+        display: block;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--panel);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    th {
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 11px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--panel2);
+        color: var(--text);
+        font-size: 16px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+
+    .primary {
+        padding: 11px 16px;
+        border: none;
+        border-radius: 8px;
+        background: var(--blue);
+        color: #07111f;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .danger {
+        padding: 7px 10px;
+        border: none;
+        border-radius: 7px;
+        background: var(--red);
+        color: #111;
+        cursor: pointer;
+    }
+
+    .secondary {
+        padding: 11px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel2);
+        color: var(--text);
+        cursor: pointer;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .progress {
+        width: 100%;
+        height: 8px;
+        background: #25334a;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 7px;
+    }
+
+    .progress div {
+        height: 100%;
+        background: var(--green);
+    }
+
+    .section {
+        margin-bottom: 25px;
+    }
+
+    .summary-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 18px;
+        border-radius: 14px;
+        margin-bottom: 20px;
+    }
+
+    .summary-box h3 {
+        margin-top: 0;
+    }
+
+    .budget-category {
+        margin-bottom: 13px;
+    }
+
+    .budget-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .budget-row span:last-child {
+        text-align: right;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .file-label {
+        display: inline-block;
+        padding: 11px 16px;
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .file-label input {
+        display: none;
+    }
+
+    @media(max-width: 850px) {
+        .cards {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media(max-width: 550px) {
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+            display: none;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>💰 Aubrey Budget</h1>
+    <p>Give every rand a job.</p>
+</header>
+
+<div class="container">
+
+    <div class="cards">
+        <div class="card">
+            <small>Monthly Income</small>
+            <strong id="incomeCard">R0.00</strong>
+        </div>
+
+        <div class="card">
+            <small>Budgeted</small>
+            <strong id="budgetCard">R0.00</strong>
+        </div>
+
+        <div class="card">
+            <small>Spent This Month</small>
+            <strong id="spentCard">R0.00</strong>
+        </div>
+
+        <div class="card">
+            <small>Unallocated</small>
+            <strong id="unallocatedCard">R0.00</strong>
+        </div>
+    </div>
+
+    <nav>
+        <button class="tab active" data-page="dashboard">Dashboard</button>
+        <button class="tab" data-page="budget">Budget</button>
+        <button class="tab" data-page="transactions">Transactions</button>
+        <button class="tab" data-page="recurring">Recurring</button>
+        <button class="tab" data-page="settings">Backup</button>
+    </nav>
+
+    <!-- DASHBOARD -->
+
+    <section id="dashboard" class="page active">
+
+        <div class="summary-box">
+            <h3>Monthly position</h3>
+            <div id="dashboardCategories"></div>
+        </div>
+
+    </section>
+
+    <!-- BUDGET -->
+
+    <section id="budget" class="page">
+
+        <h2>Monthly Budget</h2>
+
+        <div class="form-grid">
+            <input id="newBudgetName" placeholder="Category">
+
+            <input
+                id="newBudgetAmount"
+                type="number"
+                step="0.01"
+                placeholder="Amount"
+            >
+
+            <select id="newBudgetGroup">
+                <option>Housing</option>
+                <option>Transport</option>
+                <option>Insurance</option>
+                <option>Food</option>
+                <option>Subscriptions</option>
+                <option>Family</option>
+                <option>Savings</option>
+                <option>Debt</option>
+                <option>Personal</option>
+                <option>Other</option>
+            </select>
+
+            <label>
+                <input
+                    id="newBudgetRecurring"
+                    type="checkbox"
+                    style="width:auto"
+                >
+                Recurring
+            </label>
+
+            <button class="primary" id="addBudgetBtn">
+                Add
+            </button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Group</th>
+                    <th>Budget</th>
+                    <th>Spent</th>
+                    <th>Remaining</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody id="budgetTable"></tbody>
+        </table>
+
+    </section>
+
+    <!-- TRANSACTIONS -->
+
+    <section id="transactions" class="page">
+
+        <h2>Transactions</h2>
+
+        <div class="form-grid">
+
+            <input id="txDate" type="date">
+
+            <input
+                id="txDescription"
+                placeholder="Description"
+            >
+
+            <select id="txCategory"></select>
+
+            <input
+                id="txAmount"
+                type="number"
+                step="0.01"
+                placeholder="Amount"
+            >
+
+            <button class="primary" id="addTransactionBtn">
+                Add
+            </button>
+
+        </div>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody id="transactionTable"></tbody>
+
+        </table>
+
+    </section>
+
+    <!-- RECURRING -->
+
+    <section id="recurring" class="page">
+
+        <h2>Recurring Commitments</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Commitment</th>
+                    <th>Monthly</th>
+                    <th>Annual</th>
+                </tr>
+            </thead>
+
+            <tbody id="recurringTable"></tbody>
+
+        </table>
+
+    </section>
+
+    <!-- SETTINGS -->
+
+    <section id="settings" class="page">
+
+        <h2>Backup & Restore</h2>
+
+        <div class="summary-box">
+
+            <p>
+                Your data is currently stored locally on this device.
+                Export a backup before clearing browser data.
+            </p>
+
+            <div class="actions">
+
+                <button
+                    class="primary"
+                    id="exportBackupBtn"
+                >
+                    Export Backup
+                </button>
+
+                <button
+                    class="secondary"
+                    id="exportCsvBtn"
+                >
+                    Export Transactions CSV
+                </button>
+
+                <label class="file-label">
+                    Restore Backup
+                    <input
+                        id="restoreBackupInput"
+                        type="file"
+                        accept=".json"
+                    >
+                </label>
+
+                <button
+                    class="danger"
+                    id="resetBtn"
+                >
+                    Reset App
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="summary-box">
+
+            <h3>Dropbox Sync</h3>
+
+            <p>
+                Dropbox sync will be added after the local budgeting
+                engine is stable.
+            </p>
+
+            <button class="secondary" disabled>
+                Connect Dropbox — coming next
+            </button>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+
+const STORAGE_KEY = "aubreyBudgetV1";
+
+function money(value) {
+    return new Intl.NumberFormat(
+        "en-ZA",
+        {
+            style: "currency",
+            currency: "ZAR"
+        }
+    ).format(value);
+}
+
+const defaultData = {
+
+    income: [
+        {
+            name: "Salary",
+            amount: 43159.98
+        },
+        {
+            name: "Rental income",
+            amount: 4500
+        },
+        {
+            name: "Parking rental",
+            amount: 550
+        }
+    ],
+
+    budget: [
+
+        {
+            name: "Main Home Bond",
+            group: "Housing",
+            amount: 16824.06,
+            recurring: true
+        },
+
+        {
+            name: "Rental Property Bond",
+            group: "Housing",
+            amount: 3512.09,
+            recurring: true
+        },
+
+        {
+            name: "Levy",
+            group: "Housing",
+            amount: 900,
+            recurring: true
+        },
+
+        {
+            name: "Levy Catch-up",
+            group: "Housing",
+            amount: 300,
+            recurring: true
+        },
+
+        {
+            name: "Parking Cost",
+            group: "Housing",
+            amount: 470,
+            recurring: true
+        },
+
+        {
+            name: "City of Tshwane",
+            group: "Housing",
+            amount: 2200,
+            recurring: true
+        },
+
+        {
+            name: "Nanny",
+            group: "Family",
+            amount: 2800,
+            recurring: true
+        },
+
+        {
+            name: "Groceries",
+            group: "Food",
+            amount: 5000,
+            recurring: false
+        },
+
+        {
+            name: "Fuel",
+            group: "Transport",
+            amount: 3000,
+            recurring: false
+        },
+
+        {
+            name: "King Price",
+            group: "Insurance",
+            amount: 1645.94,
+            recurring: true
+        },
+
+        {
+            name: "Tracker",
+            group: "Transport",
+            amount: 513.37,
+            recurring: true
+        },
+
+        {
+            name: "Tracker Insurance",
+            group: "Insurance",
+            amount: 78,
+            recurring: true
+        },
+
+        {
+            name: "Old Mutual Life",
+            group: "Insurance",
+            amount: 900,
+            recurring: true
+        },
+
+        {
+            name: "Vodacom",
+            group: "Subscriptions",
+            amount: 500,
+            recurring: true
+        },
+
+        {
+            name: "Bank Monthly Fee",
+            group: "Other",
+            amount: 490,
+            recurring: true
+        },
+
+        {
+            name: "Overdraft / Service Fee",
+            group: "Other",
+            amount: 69,
+            recurring: true
+        },
+
+        {
+            name: "ChatGPT",
+            group: "Subscriptions",
+            amount: 399,
+            recurring: true
+        },
+
+        {
+            name: "Apple",
+            group: "Subscriptions",
+            amount: 252.98,
+            recurring: true
+        },
+
+        {
+            name: "Deezer",
+            group: "Subscriptions",
+            amount: 129.99,
+            recurring: true
+        },
+
+        {
+            name: "Google One",
+            group: "Subscriptions",
+            amount: 54,
+            recurring: true
+        },
+
+        {
+            name: "YouTube",
+            group: "Subscriptions",
+            amount: 34.99,
+            recurring: true
+        },
+
+        {
+            name: "UCount",
+            group: "Subscriptions",
+            amount: 25,
+            recurring: true
+        },
+
+        {
+            name: "Family / Outings",
+            group: "Family",
+            amount: 2000,
+            recurring: false
+        },
+
+        {
+            name: "Personal Money",
+            group: "Personal",
+            amount: 1000,
+            recurring: false
+        },
+
+        {
+            name: "Flowers",
+            group: "Family",
+            amount: 600,
+            recurring: false
+        },
+
+        {
+            name: "Credit Card Payoff",
+            group: "Debt",
+            amount: 3000,
+            recurring: false
+        },
+
+        {
+            name: "Emergency Fund",
+            group: "Savings",
+            amount: 1000,
+            recurring: false
+        },
+
+        {
+            name: "Home / Car Maintenance",
+            group: "Savings",
+            amount: 500,
+            recurring: false
+        },
+
+        {
+            name: "Buffer",
+            group: "Other",
+            amount: 11.56,
+            recurring: false
+        }
+
+    ],
+
+    transactions: []
+};
+
+let data = loadData();
+
+function loadData() {
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+        return JSON.parse(JSON.stringify(defaultData));
+    }
+
+    try {
+        return JSON.parse(saved);
+    }
+    catch {
+        return JSON.parse(JSON.stringify(defaultData));
+    }
+}
+
+function saveData() {
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data)
+    );
+}
+
+function totalIncome() {
+
+    return data.income.reduce(
+        (sum, item) => sum + Number(item.amount),
+        0
+    );
+}
+
+function totalBudget() {
+
+    return data.budget.reduce(
+        (sum, item) => sum + Number(item.amount),
+        0
+    );
+}
+
+function totalSpent() {
+
+    return data.transactions.reduce(
+        (sum, tx) => sum + Number(tx.amount),
+        0
+    );
+}
+
+function spentForCategory(category) {
+
+    return data.transactions
+        .filter(tx => tx.category === category)
+        .reduce(
+            (sum, tx) => sum + Number(tx.amount),
+            0
+        );
+}
+
+function renderCards() {
+
+    const income = totalIncome();
+    const budget = totalBudget();
+    const spent = totalSpent();
+    const unallocated = income - budget;
+
+    document.getElementById("incomeCard").textContent =
+        money(income);
+
+    document.getElementById("budgetCard").textContent =
+        money(budget);
+
+    document.getElementById("spentCard").textContent =
+        money(spent);
+
+    const el =
+        document.getElementById("unallocatedCard");
+
+    el.textContent = money(unallocated);
+
+    el.classList.remove(
+        "positive",
+        "negative",
+        "warning"
+    );
+
+    if (Math.abs(unallocated) < 0.01) {
+        el.classList.add("positive");
+    }
+    else if (unallocated < 0) {
+        el.classList.add("negative");
+    }
+    else {
+        el.classList.add("warning");
+    }
+}
+
+function renderBudget() {
+
+    const tbody =
+        document.getElementById("budgetTable");
+
+    tbody.innerHTML = "";
+
+    data.budget.forEach((item, index) => {
+
+        const spent =
+            spentForCategory(item.name);
+
+        const remaining =
+            item.amount - spent;
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${escapeHtml(item.name)}</td>
+
+            <td>${escapeHtml(item.group)}</td>
+
+            <td>
+                <input
+                    type="number"
+                    step="0.01"
+                    value="${item.amount}"
+                    data-budget-index="${index}"
+                    class="budgetAmount"
+                >
+            </td>
+
+            <td>${money(spent)}</td>
+
+            <td class="${
+                remaining < 0
+                    ? "negative"
+                    : "positive"
+            }">
+                ${money(remaining)}
+            </td>
+
+            <td>
+                <button
+                    class="danger deleteBudget"
+                    data-index="${index}"
+                >
+                    ×
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    document
+        .querySelectorAll(".budgetAmount")
+        .forEach(input => {
+
+            input.addEventListener(
+                "change",
+                function() {
+
+                    const index =
+                        Number(this.dataset.budgetIndex);
+
+                    const value =
+                        Number(this.value);
+
+                    if (
+                        !Number.isFinite(value) ||
+                        value < 0
+                    ) {
+                        return;
+                    }
+
+                    data.budget[index].amount = value;
+
+                    saveData();
+                    renderAll();
+                }
+            );
+        });
+
+    document
+        .querySelectorAll(".deleteBudget")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    const index =
+                        Number(this.dataset.index);
+
+                    if (
+                        confirm(
+                            "Delete this budget category?"
+                        )
+                    ) {
+                        data.budget.splice(index, 1);
+
+                        saveData();
+                        renderAll();
+                    }
+                }
+            );
+        });
+}
+
+function renderTransactionCategories() {
+
+    const select =
+        document.getElementById("txCategory");
+
+    select.innerHTML = "";
+
+    data.budget.forEach(item => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = item.name;
+        option.textContent = item.name;
+
+        select.appendChild(option);
+    });
+}
+
+function renderTransactions() {
+
+    const tbody =
+        document.getElementById(
+            "transactionTable"
+        );
+
+    tbody.innerHTML = "";
+
+    const sorted =
+        [...data.transactions]
+        .sort(
+            (a, b) =>
+                new Date(b.date) -
+                new Date(a.date)
+        );
+
+    sorted.forEach(tx => {
+
+        const originalIndex =
+            data.transactions.indexOf(tx);
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${escapeHtml(tx.date)}</td>
+
+            <td>
+                ${escapeHtml(tx.description)}
+            </td>
+
+            <td>
+                ${escapeHtml(tx.category)}
+            </td>
+
+            <td>
+                ${money(tx.amount)}
+            </td>
+
+            <td>
+                <button
+                    class="danger deleteTx"
+                    data-index="${originalIndex}"
+                >
+                    ×
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    document
+        .querySelectorAll(".deleteTx")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    const index =
+                        Number(this.dataset.index);
+
+                    data.transactions.splice(
+                        index,
+                        1
+                    );
+
+                    saveData();
+                    renderAll();
+                }
+            );
+        });
+}
+
+function renderRecurring() {
+
+    const tbody =
+        document.getElementById(
+            "recurringTable"
+        );
+
+    tbody.innerHTML = "";
+
+    data.budget
+        .filter(item => item.recurring)
+        .forEach(item => {
+
+            const tr =
+                document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${escapeHtml(item.name)}</td>
+                <td>${money(item.amount)}</td>
+                <td>${money(item.amount * 12)}</td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+}
+
+function renderDashboard() {
+
+    const container =
+        document.getElementById(
+            "dashboardCategories"
+        );
+
+    container.innerHTML = "";
+
+    data.budget.forEach(item => {
+
+        const spent =
+            spentForCategory(item.name);
+
+        const remaining =
+            item.amount - spent;
+
+        const percentage =
+            item.amount > 0
+                ? Math.min(
+                    (spent / item.amount) * 100,
+                    100
+                )
+                : 0;
+
+        const div =
+            document.createElement("div");
+
+        div.className = "budget-category";
+
+        div.innerHTML = `
+            <div class="budget-row">
+                <span>
+                    ${escapeHtml(item.name)}
+                </span>
+
+                <span>
+                    ${money(spent)}
+                    /
+                    ${money(item.amount)}
+                </span>
+            </div>
+
+            <div class="progress">
+                <div
+                    style="width:${percentage}%"
+                ></div>
+            </div>
+
+            <small class="${
+                remaining < 0
+                    ? "negative"
+                    : ""
+            }">
+                ${money(remaining)} remaining
+            </small>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+function renderAll() {
+
+    renderCards();
+    renderBudget();
+    renderTransactionCategories();
+    renderTransactions();
+    renderRecurring();
+    renderDashboard();
+}
+
+function escapeHtml(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = String(value);
+
+    return div.innerHTML;
+}
+
+/* Tabs */
+
+document
+    .querySelectorAll(".tab")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                document
+                    .querySelectorAll(".tab")
+                    .forEach(
+                        btn =>
+                            btn.classList.remove(
+                                "active"
+                            )
+                    );
+
+                document
+                    .querySelectorAll(".page")
+                    .forEach(
+                        page =>
+                            page.classList.remove(
+                                "active"
+                            )
+                    );
+
+                this.classList.add("active");
+
+                document
+                    .getElementById(
+                        this.dataset.page
+                    )
+                    .classList.add("active");
+            }
+        );
+    });
+
+/* Add Budget */
+
+document
+    .getElementById("addBudgetBtn")
+    .addEventListener(
+        "click",
+        function() {
+
+            const name =
+                document
+                    .getElementById(
+                        "newBudgetName"
+                    )
+                    .value
+                    .trim();
+
+            const amount =
+                Number(
+                    document
+                        .getElementById(
+                            "newBudgetAmount"
+                        )
+                        .value
+                );
+
+            const group =
+                document
+                    .getElementById(
+                        "newBudgetGroup"
+                    )
+                    .value;
+
+            const recurring =
+                document
+                    .getElementById(
+                        "newBudgetRecurring"
+                    )
+                    .checked;
+
+            if (
+                !name ||
+                !Number.isFinite(amount) ||
+                amount < 0
+            ) {
+                alert(
+                    "Enter a valid category and amount."
+                );
+
+                return;
+            }
+
+            data.budget.push({
+                name,
+                amount,
+                group,
+                recurring
+            });
+
+            document
+                .getElementById(
+                    "newBudgetName"
+                )
+                .value = "";
+
+            document
+                .getElementById(
+                    "newBudgetAmount"
+                )
+                .value = "";
+
+            saveData();
+            renderAll();
+        }
+    );
+
+/* Add Transaction */
+
+document
+    .getElementById(
+        "addTransactionBtn"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            const date =
+                document
+                    .getElementById("txDate")
+                    .value;
+
+            const description =
+                document
+                    .getElementById(
+                        "txDescription"
+                    )
+                    .value
+                    .trim();
+
+            const category =
+                document
+                    .getElementById(
+                        "txCategory"
+                    )
+                    .value;
+
+            const amount =
+                Number(
+                    document
+                        .getElementById(
+                            "txAmount"
+                        )
+                        .value
+                );
+
+            if (
+                !date ||
+                !description ||
+                !Number.isFinite(amount) ||
+                amount <= 0
+            ) {
+                alert(
+                    "Enter a valid transaction."
+                );
+
+                return;
+            }
+
+            data.transactions.push({
+                date,
+                description,
+                category,
+                amount
+            });
+
+            document
+                .getElementById(
+                    "txDescription"
+                )
+                .value = "";
+
+            document
+                .getElementById(
+                    "txAmount"
+                )
+                .value = "";
+
+            saveData();
+            renderAll();
+        }
+    );
+
+/* Backup */
+
+document
+    .getElementById(
+        "exportBackupBtn"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            const blob =
+                new Blob(
+                    [
+                        JSON.stringify(
+                            data,
+                            null,
+                            2
+                        )
+                    ],
+                    {
+                        type:
+                            "application/json"
+                    }
+                );
+
+            downloadBlob(
+                blob,
+                "aubrey-budget-backup.json"
+            );
+        }
+    );
+
+/* CSV Export */
+
+document
+    .getElementById(
+        "exportCsvBtn"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            let csv =
+                "Date,Description,Category,Amount\n";
+
+            data.transactions.forEach(tx => {
+
+                csv +=
+                    `"${tx.date}",` +
+                    `"${tx.description.replaceAll(
+                        '"',
+                        '""'
+                    )}",` +
+                    `"${tx.category.replaceAll(
+                        '"',
+                        '""'
+                    )}",` +
+                    `${tx.amount}\n`;
+            });
+
+            const blob =
+                new Blob(
+                    [csv],
+                    {
+                        type: "text/csv"
+                    }
+                );
+
+            downloadBlob(
+                blob,
+                "budget-transactions.csv"
+            );
+        }
+    );
+
+function downloadBlob(blob, filename) {
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(link);
+
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+/* Restore */
+
+document
+    .getElementById(
+        "restoreBackupInput"
+    )
+    .addEventListener(
+        "change",
+        function(event) {
+
+            const file =
+                event.target.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            const reader =
+                new FileReader();
+
+            reader.onload =
+                function() {
+
+                    try {
+
+                        const imported =
+                            JSON.parse(
+                                reader.result
+                            );
+
+                        if (
+                            !imported.income ||
+                            !imported.budget ||
+                            !imported.transactions
+                        ) {
+                            throw new Error(
+                                "Invalid backup"
+                            );
+                        }
+
+                        data = imported;
+
+                        saveData();
+                        renderAll();
+
+                        alert(
+                            "Backup restored."
+                        );
+                    }
+                    catch {
+                        alert(
+                            "That does not appear to be a valid budget backup."
+                        );
+                    }
+                };
+
+            reader.readAsText(file);
+        }
+    );
+
+/* Reset */
+
+document
+    .getElementById("resetBtn")
+    .addEventListener(
+        "click",
+        function() {
+
+            if (
+                !confirm(
+                    "Reset the entire app?"
+                )
+            ) {
+                return;
+            }
+
+            data =
+                JSON.parse(
+                    JSON.stringify(
+                        defaultData
+                    )
+                );
+
+            saveData();
+            renderAll();
+        }
+    );
+
+/* Today's date */
+
+document
+    .getElementById("txDate")
+    .value =
+        new Date()
+            .toISOString()
+            .slice(0, 10);
+
+renderAll();
+if ("serviceWorker" in navigator) {
+
+    navigator.serviceWorker
+        .register("./service-worker.js")
+        .then(registration => {
+            console.log(
+                "Service Worker registered",
+                registration
+            );
+        })
+        .catch(error => {
+            console.error(
+                "Service Worker error:",
+                error
+            );
+        });
+}
+
+
+</script>
+
+</body>
+</html>
