@@ -285,7 +285,6 @@
         display: none;
     }
 }
-    }
 </style>
 </head>
 
@@ -380,6 +379,33 @@
             <button class="primary" id="addBudgetBtn">
                 Add
             </button>
+        </div>
+
+        <div class="summary-box">
+            <h3>Move Money</h3>
+            <p style="color:var(--muted); margin-top:0;">
+                Shift budget between categories without changing your total monthly budget.
+            </p>
+
+            <div class="form-grid">
+                <select id="moveFromCategory" aria-label="Move money from category"></select>
+                <select id="moveToCategory" aria-label="Move money to category"></select>
+
+                <input
+                    id="moveAmount"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="Amount"
+                    aria-label="Amount to move"
+                >
+
+                <button class="primary" id="moveMoneyBtn">
+                    Move Money
+                </button>
+            </div>
+
+            <small id="moveMoneyMessage" style="color:var(--muted);"></small>
         </div>
 
         <table>
@@ -1004,6 +1030,69 @@ function renderTransactionCategories() {
     });
 }
 
+function renderMoveMoneyCategories() {
+
+    const fromSelect =
+        document.getElementById("moveFromCategory");
+
+    const toSelect =
+        document.getElementById("moveToCategory");
+
+    if (!fromSelect || !toSelect) {
+        return;
+    }
+
+    const previousFrom = fromSelect.value;
+    const previousTo = toSelect.value;
+
+    fromSelect.innerHTML = "";
+    toSelect.innerHTML = "";
+
+    const fromPlaceholder =
+        document.createElement("option");
+    fromPlaceholder.value = "";
+    fromPlaceholder.textContent = "From category";
+    fromSelect.appendChild(fromPlaceholder);
+
+    const toPlaceholder =
+        document.createElement("option");
+    toPlaceholder.value = "";
+    toPlaceholder.textContent = "To category";
+    toSelect.appendChild(toPlaceholder);
+
+    data.budget.forEach((item, index) => {
+
+        const fromOption =
+            document.createElement("option");
+        fromOption.value = String(index);
+        fromOption.textContent =
+            `${item.name} — ${money(item.amount)}`;
+        fromSelect.appendChild(fromOption);
+
+        const toOption =
+            document.createElement("option");
+        toOption.value = String(index);
+        toOption.textContent =
+            `${item.name} — ${money(item.amount)}`;
+        toSelect.appendChild(toOption);
+    });
+
+    if (
+        previousFrom !== "" &&
+        data.budget[Number(previousFrom)]
+    ) {
+        fromSelect.value = previousFrom;
+    }
+
+    if (
+        previousTo !== "" &&
+        data.budget[Number(previousTo)]
+    ) {
+        toSelect.value = previousTo;
+    }
+}
+
+
 function renderTransactions() {
 
     const tbody =
@@ -1173,6 +1262,7 @@ function renderAll() {
     renderCards();
     renderBudget();
     renderTransactionCategories();
+    renderMoveMoneyCategories();
     renderTransactions();
     renderRecurring();
     renderDashboard();
@@ -1301,6 +1391,88 @@ document
             renderAll();
         }
     );
+
+/* Move Money */
+
+document
+    .getElementById("moveMoneyBtn")
+    .addEventListener(
+        "click",
+        function() {
+
+            const fromValue =
+                document
+                    .getElementById("moveFromCategory")
+                    .value;
+
+            const toValue =
+                document
+                    .getElementById("moveToCategory")
+                    .value;
+
+            const amount =
+                Number(
+                    document
+                        .getElementById("moveAmount")
+                        .value
+                );
+
+            const message =
+                document.getElementById(
+                    "moveMoneyMessage"
+                );
+
+            if (
+                fromValue === "" ||
+                toValue === "" ||
+                !Number.isFinite(amount) ||
+                amount <= 0
+            ) {
+                message.className = "negative";
+                message.textContent =
+                    "Choose two categories and enter a valid amount.";
+                return;
+            }
+
+            const fromIndex = Number(fromValue);
+            const toIndex = Number(toValue);
+
+            if (fromIndex === toIndex) {
+                message.className = "negative";
+                message.textContent =
+                    "Choose two different categories.";
+                return;
+            }
+
+            const fromItem = data.budget[fromIndex];
+            const toItem = data.budget[toIndex];
+
+            if (amount > Number(fromItem.amount)) {
+                message.className = "negative";
+                message.textContent =
+                    `${fromItem.name} only has ${money(fromItem.amount)} budgeted.`;
+                return;
+            }
+
+            fromItem.amount =
+                Number((Number(fromItem.amount) - amount).toFixed(2));
+
+            toItem.amount =
+                Number((Number(toItem.amount) + amount).toFixed(2));
+
+            saveData();
+            renderAll();
+
+            document
+                .getElementById("moveAmount")
+                .value = "";
+
+            message.className = "positive";
+            message.textContent =
+                `Moved ${money(amount)} from ${fromItem.name} to ${toItem.name}.`;
+        }
+    );
+
 
 /* Add Transaction */
 
